@@ -34,6 +34,7 @@ public class GamePanel extends JPanel implements KeyListener{
     LoadSound loadSound = new LoadSound();
     PlayerShip player;
     PlanetStrike strike;
+    private final ArrayList<Clip> clipList = new ArrayList<>();
     
     private final int width,height;
     
@@ -51,7 +52,7 @@ public class GamePanel extends JPanel implements KeyListener{
     private final ArrayList<EntitiesBase> toRemove = new ArrayList<>();
     
     private boolean playerMoveLeft=false,playerMoveRight=false,playerDoShot=false,cheatLvl=false,specialAction=false,isDashing=false,playerSendMissle=false,onePressed=false,twoPressed=false,threePressed=false,goMenu=false,planetStrike=false;
-    private int score=0,gameLevel=1,BkPos=0,pointsTotal=0,pointsSpend=0,damageReduction=0,stageTimer=0,planetStrikeBreak=0,freePos=50,cheatStop=20;
+    private int score=0,gameLevel=111,BkPos=0,pointsTotal=0,pointsSpend=0,damageReduction=0,stageTimer=0,planetStrikeBreak=0,freePos=50,cheatStop=20;
     private short playerDashTimer=8,canDash=80,playerSpeed=2,dashSpeed=10;
 
     public GamePanel(int width,int height){
@@ -69,6 +70,7 @@ public class GamePanel extends JPanel implements KeyListener{
         load.loadGraphics(map);
         
         loadSound.load("sound/music.wav").loop(Clip.LOOP_CONTINUOUSLY);
+        loadWavs();
     }
     
     @Override
@@ -138,9 +140,15 @@ public class GamePanel extends JPanel implements KeyListener{
         if (e.getKeyCode() == KeyEvent.VK_U){cheatLvl=false;}
     }
     
-    private void playDetonation(){loadSound.load("sound/bum.wav").start();}
-    private void playLaser(){loadSound.load("sound/laser.wav").start();}
-    private void playShipDestroyed(){loadSound.load("sound/shipDestroyed.wav").start();}
+    private void playDetonation(){if(!clipList.get(0).isRunning()){clipList.get(0).setFramePosition(0);clipList.get(0).start();}}
+    private void playLaser(){if(!clipList.get(1).isRunning()){clipList.get(1).setFramePosition(0);clipList.get(1).start();}}
+    private void playShipDestroyed(){if(!clipList.get(2).isRunning()){clipList.get(2).setFramePosition(0);clipList.get(2).start();}}
+    private void loadWavs(){
+        clipList.add(loadSound.load("sound/bum.wav"));
+        clipList.add(loadSound.load("sound/laser.wav"));
+        clipList.add(loadSound.load("sound/shipDestroyed.wav"));
+    }
+    
     
     private void playerWeaponChange(){
         if(specialAction && onePressed){player.setLaserType(1);}
@@ -253,14 +261,14 @@ public class GamePanel extends JPanel implements KeyListener{
         for(EntitiesShips e : enemyList){
             e.update();
             if(e.getImage()==map.get(2)){
-                if(((FlagEnemyShip)e).laserChance() && !laserFlagMap.containsKey(e)){
+                if(((FlagEnemyShip)e).laserChance() && !laserFlagMap.containsKey(((FlagEnemyShip)e))){
                     BigOneLaser shot = new BigOneLaser(e.getX()+e.image.getWidth()/2,e.getY()+e.image.getHeight()+map.get(4).getHeight(),map.get(4));
                     lasersList.add(shot);
                     laserFlagMap.put(((FlagEnemyShip)e), shot);
                 }
-                if(laserFlagMap.containsKey(e)){
-                    laserFlagMap.get(e).setPosition(e.getX()+e.image.getWidth()/2,e.getY()+e.image.getHeight()+map.get(4).getHeight());
-                    if(laserFlagMap.get(e).checkRange()){laserFlagMap.remove(e);}
+                if(laserFlagMap.containsKey(((FlagEnemyShip)e))){
+                    laserFlagMap.get(((FlagEnemyShip)e)).setPosition(e.getX()+e.image.getWidth()/2,e.getY()+e.image.getHeight()+map.get(4).getHeight());
+                    if(laserFlagMap.get(((FlagEnemyShip)e)).checkRange()){laserFlagMap.remove(((FlagEnemyShip)e));}
                 }
             }
         }
@@ -320,7 +328,7 @@ public class GamePanel extends JPanel implements KeyListener{
         missleDetonationList.removeAll(toRemove);
         
         BkPos++;
-        if(BkPos==height){BkPos=0;}
+        if(BkPos==height){BkPos=0;} 
     }
     
     private boolean detectGeneric(EntitiesShips T){
@@ -333,6 +341,7 @@ public class GamePanel extends JPanel implements KeyListener{
                     if(!s.checkCharge()){toRemove.add(s);}
                     }
                 }
+            playerLaser.removeAll(toRemove);
             for(PlayerMissle s : playerMissles){
                 if(e.intersects(s.entitySquare())){
                     playDetonation();
@@ -341,12 +350,12 @@ public class GamePanel extends JPanel implements KeyListener{
                     toRemove.add(s);
                 }
             }
+            playerMissles.removeAll(toRemove);
             for(MissleDetonation s : missleDetonationList){
                 if(e.intersects(s.entitySquare())){
                     T.calculateDamage(player.getMissleDamage());
                 }
             }
-            playerLaser.removeAll(toRemove);
             if(T.getLife()<=0){
                 remove=true;
                 playShipDestroyed();
@@ -362,9 +371,13 @@ public class GamePanel extends JPanel implements KeyListener{
         for(EntitiesShips e : enemyList){
             
             if(detectGeneric(e)){
+                if(e.getImage()==map.get(2) && laserFlagMap.containsKey((FlagEnemyShip)e)){
+                    laserFlagMap.get((FlagEnemyShip)e).changeTimer();
+                }
                 e.chanceToBonus();
                 score+=e.getScore();
                 toRemove.add(e);
+                
             }
         }
         enemyList.removeAll(toRemove);
@@ -410,11 +423,14 @@ public class GamePanel extends JPanel implements KeyListener{
         }
         bonusList.removeAll(toRemove);
         
+        toRemove.clear();
+        
+        System.out.println(lasersList.size() +"   "+ enemyList.size()+"      "+playerLaser.size()+"      "+playerMissles.size()+"      "+toRemove.size()+"     "+bonusList.size()+"     "+detonationList.size()+"      "+missleDetonationList.size());
         if(!player.haveLifes()){return true;}
         if(enemyList.isEmpty()){gameLevel+=1;stageTimer=0;freePos=50;}
         return false;
-    }
-    
+    }    
+
     public String getScore(){return " "+score;}
     public boolean goToMenu(){return goMenu;}
     public void setGoToMenu(){goMenu=false;}
