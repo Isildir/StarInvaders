@@ -77,12 +77,12 @@ public class GamePanel extends JPanel implements KeyListener{
 
     private void loadGraphics() {
         map.put(1, load.loadImage("img/playerShip.gif"));//gracz stoi
-        map.put(2, load.loadImage("img/lolo4.png"));//gracz skreca w lewo
+        map.put(2, load.loadImage("img/flagShip.png"));//gracz skreca w lewo
         map.put(3, load.loadImage("img/strike.png"));//okragly pocisk
         map.put(4, load.loadImage("img/enemyLaser.jpg"));//podstawowy pocisk
-        map.put(5, load.loadImage("img/lol1.png"));//obcy lekki stoi
-        map.put(6, load.loadImage("img/lolo2.png"));//obcy lekki w lewo
-        map.put(7, load.loadImage("img/lolo3.png"));//obcy lekki w prawo
+        map.put(5, load.loadImage("img/lightShip.png"));//obcy lekki stoi
+        map.put(6, load.loadImage("img/mediumShip.png"));//obcy lekki w lewo
+        map.put(7, load.loadImage("img/heavyShip.png"));//obcy lekki w prawo
         map.put(8, load.loadImage("img/bum.gif"));//wybuch po zniszczeniu
         map.put(9, load.loadImage("img/gameBackground.jpg"));//tlo
         map.put(10,load.loadImage("img/shield.png"));//tarcza kinetyczna
