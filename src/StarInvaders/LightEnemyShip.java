@@ -13,7 +13,7 @@ import java.util.Map;
  *
  * @author tak
  */
-public class LightEnemyShip extends EntitiesShips{
+public class LightEnemyShip extends EntitiesShips implements EnemyStuff{
     
     private boolean arriving=true,descending=true,backing=true;
     private int timer=(int)(Math.random()*200),phase2Time=116,dx;
@@ -36,15 +36,12 @@ public class LightEnemyShip extends EntitiesShips{
         this.bonusList=bonusList;
     }
     
+    @Override
     public int getScore(){
         return 30;
     }
-    
+
     @Override
-    public int getSize(){
-        return 1;
-    }
-    
     public void update(){
         if(timer<=0){
             if(arriving==true){movementOne();}
@@ -92,13 +89,15 @@ public class LightEnemyShip extends EntitiesShips{
         }else{descending=true;backing=true;timer=240;}
     }
     
+    @Override
     public void tryToShot(){
         if(Math.random()>=0.9992){
-            LightShipFire shot = new LightShipFire(x+(image.getWidth()-map.get(4).getWidth())/2,y+image.getHeight()+map.get(4).getHeight(),map.get(4));
+            BulletEntities shot = new LightShipFire(x+(image.getWidth()-map.get(4).getWidth())/2,y+image.getHeight()+map.get(4).getHeight(),map.get(4));
             lightFire.add(shot);
         }
     }
     
+    @Override
     public void chanceToBonus(){
         if(Math.random()>=0.975){
             Bonus bonus = new Bonus(x,y,map.get(12));

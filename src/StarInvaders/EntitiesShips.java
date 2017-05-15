@@ -29,9 +29,17 @@ public class EntitiesShips extends EntitiesBase{
     public BufferedImage getImage(){
         return image;
     }
-    
-    protected int getSize(){
+  
+    protected int getScore(){
         return 0;
+    }
+    
+    protected void chanceToBonus(){
+        //to use in subclass
+    }
+    
+    protected void update(){
+        //to use in subclass
     }
 
     protected void calculateDamage(int damage){

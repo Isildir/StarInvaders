@@ -18,5 +18,8 @@ public class BulletEntities extends EntitiesBase{
         this.image=image;
     }
     
-    public void update(){}
+    protected void update(){}
+    protected int getDamage(){return 0;}
+    protected boolean checkRange(){return false;}
+    
 }

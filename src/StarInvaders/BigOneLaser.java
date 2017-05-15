@@ -32,14 +32,21 @@ public class BigOneLaser extends BulletEntities{
         this.y=y;
     }
 
-    public boolean checkTimer(){
+    @Override
+    public boolean checkRange(){
         return timer>500;
+    }
+    
+    @Override
+    public int getDamage(){
+        return 80;
     }
    
     public void changeTimer(){
         timer=550;
     }
     
+    @Override
     public void paint(Graphics2D g){
         g.setColor(Color.red);
         if(timer<=0 && timer%4<=-1){for(int i=y;i<=height+100;i+=20){g.fillRect(x-1, i-10, 1, 15);}}

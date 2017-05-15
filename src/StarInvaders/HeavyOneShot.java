@@ -31,6 +31,12 @@ public class HeavyOneShot extends BulletEntities{
         y+=3;
     }
     
+    @Override
+    public int getDamage(){
+        return 25;
+    }
+    
+    @Override
     public boolean checkRange(){
         return y>height;
     }

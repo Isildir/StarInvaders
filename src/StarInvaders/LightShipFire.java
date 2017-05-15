@@ -21,8 +21,14 @@ public class LightShipFire extends BulletEntities{
     public void update(){
         y+=4;
     }
+    @Override
     public boolean checkRange(){
         return y>height;
+    }
+    
+    @Override
+    public int getDamage(){
+        return 12;
     }
     
     @Override

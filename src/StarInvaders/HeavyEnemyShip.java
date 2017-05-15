@@ -39,11 +39,6 @@ public class HeavyEnemyShip extends EntitiesShips implements EnemyStuff{
     }
     
     @Override
-    public int getSize(){
-        return 3;
-    }
-    
-    @Override
     public void update(){
         movement();
         tryToShot();
@@ -69,7 +64,7 @@ public class HeavyEnemyShip extends EntitiesShips implements EnemyStuff{
     @Override
     public void tryToShot(){
         if(Math.random()>=0.999){
-            HeavyOneShot shot = new HeavyOneShot(x+(image.getWidth()/2-map.get(14).getWidth()/2),y+image.getHeight()+map.get(14).getHeight()+1,map.get(14),player.getX()+map.get(1).getWidth()/2,player.getY());
+            BulletEntities shot = new HeavyOneShot(x+(image.getWidth()/2-map.get(14).getWidth()/2),y+image.getHeight()+map.get(14).getHeight()+1,map.get(14),player.getX()+map.get(1).getWidth()/2,player.getY());
             heavyShipFire.add(shot);
         }
     }

@@ -33,10 +33,6 @@ public class FlagEnemyShip extends EntitiesShips implements EnemyStuff{
         return 300;
     }
 
-    @Override    
-    public int getSize(){
-        return 4;
-    }
     
     @Override
     public void update(){

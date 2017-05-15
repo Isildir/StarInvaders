@@ -11,8 +11,8 @@ package StarInvaders;
  */
 public interface EnemyStuff {
     
-    public void update();
-    public void tryToShot();
-    public void chanceToBonus();
+    void update();
+    void tryToShot();
+    void chanceToBonus();
     
 }

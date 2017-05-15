@@ -31,22 +31,18 @@ public class GamePanel extends JPanel implements KeyListener{
 
     Map<Integer,BufferedImage> map = new HashMap<>();
     Map<FlagEnemyShip,BigOneLaser> laserFlagMap = new HashMap<>();
-    ImageLoader load = new ImageLoader();
     LoadSound loadSound = new LoadSound();
     PlayerShip player;
     PlanetStrike strike;
     
     private final int width,height;
     
-    private final ArrayList<LightShipFire> lightFire = new ArrayList<>();
-    private final ArrayList<LightShipFire> mediumFire = new ArrayList<>();
-    private final ArrayList<HeavyOneShot> heavyFire = new ArrayList<>();
-    private final ArrayList<BigOneLaser> flagFire = new ArrayList<>();
+    private final ArrayList<BulletEntities> lasersList = new ArrayList<>();
+    private final ArrayList<EntitiesShips> enemyList = new ArrayList<>();
     
     private final ArrayList<PlayerLaser> playerLaser = new ArrayList<>();
     private final ArrayList<PlayerMissle> playerMissles = new ArrayList<>();
     
-    private final ArrayList<EntitiesShips> enemyList = new ArrayList<>();
 
     private final ArrayList<Bonus> bonusList = new ArrayList<>();
     private final ArrayList<Detonation> detonationList = new ArrayList<>();
@@ -66,35 +62,13 @@ public class GamePanel extends JPanel implements KeyListener{
         setPreferredSize(new Dimension(width,height));
         this.setBounds(0, 0, width,height);
         setBackground(Color.yellow);
-        
         addKeyListener(this);
         setFocusable(true);
         
-        loadGraphics();
+        LoadGraphics load = new LoadGraphics();
+        load.loadGraphics(map);
         
         loadSound.load("sound/music.wav").loop(Clip.LOOP_CONTINUOUSLY);
-    }
-
-    private void loadGraphics() {
-        map.put(1, load.loadImage("img/playerShip.gif"));//gracz stoi
-        map.put(2, load.loadImage("img/flagShip.png"));//gracz skreca w lewo
-        map.put(3, load.loadImage("img/strike.png"));//okragly pocisk
-        map.put(4, load.loadImage("img/enemyLaser.jpg"));//podstawowy pocisk
-        map.put(5, load.loadImage("img/lightShip.png"));//obcy lekki stoi
-        map.put(6, load.loadImage("img/mediumShip.png"));//obcy lekki w lewo
-        map.put(7, load.loadImage("img/heavyShip.png"));//obcy lekki w prawo
-        map.put(8, load.loadImage("img/bum.gif"));//wybuch po zniszczeniu
-        map.put(9, load.loadImage("img/gameBackground.jpg"));//tlo
-        map.put(10,load.loadImage("img/shield.png"));//tarcza kinetyczna
-        map.put(11,load.loadImage("img/rocketBum.png"));//obrazenia
-        map.put(12,load.loadImage("img/bonus.png"));//bonus z wroga
-        map.put(13,load.loadImage("img/rocket.png"));//rakieta
-        map.put(14,load.loadImage("img/roundBullet.png"));//okragly pocisk
-        map.put(15,load.loadImage("img/playerLaser2.png"));//okragly pocisk
-        map.put(16,load.loadImage("img/playerLaser3.png"));//okragly pocisk
-        map.put(17,load.loadImage("img/menuBackground.jpg"));//okragly pocisk
-        map.put(18,load.loadImage("img/engine.png"));//okragly pocisk
-        map.put(19,load.loadImage("img/playerLaser1.jpg"));//okragly pocisk
     }
     
     @Override
@@ -106,16 +80,13 @@ public class GamePanel extends JPanel implements KeyListener{
             g.setFont(new Font("TimesRoman", Font.PLAIN, 20)); 
             g.setColor(Color.red);
             try{
+                enemyList.forEach((e) -> {e.paint(g);});
+                lasersList.forEach((e) -> {e.paint(g);});
                 bonusList.forEach((e) -> {e.paint(g);});
                 detonationList.forEach((e) -> {e.paint(g);});
-                enemyList.forEach((e) -> {e.paint(g);});
-                lightFire.forEach((s) -> {s.paint(g);});
-                mediumFire.forEach((s) -> {s.paint(g);});
                 playerLaser.forEach((e) -> {e.paint(g);});
                 playerMissles.forEach((e) -> {e.paint(g);});
                 missleDetonationList.forEach((e) -> {e.paint(g);});
-                flagFire.forEach((e) -> {e.paint(g);});
-                heavyFire.forEach((e) -> {e.paint(g);});
                 if(strike != null){strike.paint(g);}
             }catch(ConcurrentModificationException e){}
             try{
@@ -220,7 +191,7 @@ public class GamePanel extends JPanel implements KeyListener{
             for(int r=1;r<=ECperLayer;r++){
                 for(int i=0;i<=EC/ECperLayer;i++){
                     EntitiesShips enemy = new HeavyEnemyShip(i*ECinterspace+40,freePos,map);
-                    ((HeavyEnemyShip)enemy).setData(heavyFire, bonusList, player);
+                    ((HeavyEnemyShip)enemy).setData(lasersList, bonusList, player);
                     boolean direction=true;
                     if(enemyList.size()%2>0){direction=false;}
                     ((HeavyEnemyShip)enemy).setDirection(direction);
@@ -238,7 +209,7 @@ public class GamePanel extends JPanel implements KeyListener{
             for(int r=1;r<=ECperLayer;r++){
                 for(int i=0;i<=EC/ECperLayer;i++){
                     EntitiesShips enemy = new MediumEnemyShip(i*ECinterspace+40,freePos,map);
-                    ((MediumEnemyShip)enemy).setData(mediumFire, bonusList);
+                    ((MediumEnemyShip)enemy).setData(lasersList, bonusList);
                     if(enemyList.size()%2>0){((MediumEnemyShip)enemy).setDirection(false);}
                     enemyList.add(enemy);
                 }
@@ -254,7 +225,7 @@ public class GamePanel extends JPanel implements KeyListener{
             if(freePos<height/2+100){
                 for(int i=0;i<=EC/ECperLayer-1;i++){
                     EntitiesShips enemy = new LightEnemyShip(i*ECinterspace+20,freePos,map);
-                    ((LightEnemyShip)enemy).setData(lightFire, bonusList);
+                    ((LightEnemyShip)enemy).setData(lasersList, bonusList);
                     enemyList.add(enemy);
                 }
             }
@@ -279,32 +250,21 @@ public class GamePanel extends JPanel implements KeyListener{
         if(playerSendMissle){player.fireMissle();}
         if(planetStrike && planetStrikeBreak<=0){strike = new PlanetStrike(30,height+20,map.get(3));planetStrikeBreak=7200;score-=3000;}
         player.update();
-        //enemyList.forEach((e) -> {e.update();});
         for(EntitiesShips e : enemyList){
-            switch(e.getSize()){
-                case 1:
-                    ((LightEnemyShip)e).update();
-                    break;
-                case 2:
-                    ((MediumEnemyShip)e).update();
-                    break;
-                case 3:
-                    ((HeavyEnemyShip)e).update();
-                    break;
-                case 4:
-                    ((FlagEnemyShip)e).update();
-                    if(((FlagEnemyShip)e).laserChance() && !laserFlagMap.containsKey(e)){
+            e.update();
+            if(e.getImage()==map.get(2)){
+                if(((FlagEnemyShip)e).laserChance() && !laserFlagMap.containsKey(e)){
                     BigOneLaser shot = new BigOneLaser(e.getX()+e.image.getWidth()/2,e.getY()+e.image.getHeight()+map.get(4).getHeight(),map.get(4));
-                    flagFire.add(shot);
+                    lasersList.add(shot);
                     laserFlagMap.put(((FlagEnemyShip)e), shot);
-                    }
-                    if(laserFlagMap.containsKey(e)){
-                        laserFlagMap.get(e).setPosition(e.getX()+e.image.getWidth()/2,e.getY()+e.image.getHeight()+map.get(4).getHeight());
-                        if(laserFlagMap.get(e).checkTimer()){laserFlagMap.remove(e);}
-                    }
-                    break;
+                }
+                if(laserFlagMap.containsKey(e)){
+                    laserFlagMap.get(e).setPosition(e.getX()+e.image.getWidth()/2,e.getY()+e.image.getHeight()+map.get(4).getHeight());
+                    if(laserFlagMap.get(e).checkRange()){laserFlagMap.remove(e);}
+                }
             }
         }
+        
         
         if(strike != null){
             strike.update();
@@ -313,37 +273,13 @@ public class GamePanel extends JPanel implements KeyListener{
             }
         }
         
-        for(HeavyOneShot e : heavyFire){
+        for(BulletEntities e : lasersList){
             e.update();
             if(e.checkRange()){
                 toRemove.add(e);
             }
         }
-        flagFire.removeAll(toRemove); 
-        
-        for(BigOneLaser e : flagFire){
-            e.update();
-            if(e.checkTimer()){
-                toRemove.add(e);
-            }
-        }
-        flagFire.removeAll(toRemove);        
-                
-        for(LightShipFire e : lightFire){
-            e.update();
-            if(e.checkRange()){
-                toRemove.add(e);
-            }
-        }
-        lightFire.removeAll(toRemove);
-        
-        for(LightShipFire e : mediumFire){
-            e.update();
-            if(e.checkRange()){
-                toRemove.add(e);
-            }
-        }
-        mediumFire.removeAll(toRemove);
+        lasersList.removeAll(toRemove); 
 
         for(PlayerLaser e : playerLaser){
             e.update();
@@ -426,69 +362,35 @@ public class GamePanel extends JPanel implements KeyListener{
         for(EntitiesShips e : enemyList){
             
             if(detectGeneric(e)){
-                
-                switch(e.getSize()){
-                    case 1:
-                        ((LightEnemyShip)e).chanceToBonus();
-                        score+=((LightEnemyShip)e).getScore();
-                        toRemove.add(e);
-                        break;
-                    case 2:
-                        ((MediumEnemyShip)e).chanceToBonus();
-                        score+=((MediumEnemyShip)e).getScore();
-                        toRemove.add(e);
-                        break;
-                    case 3:
-                        ((HeavyEnemyShip)e).chanceToBonus();
-                        score+=((HeavyEnemyShip)e).getScore();
-                        toRemove.add(e);
-                        break;
-                    case 4:  
-                        ((HeavyEnemyShip)e).chanceToBonus();
-                        score+=((HeavyEnemyShip)e).getScore();
-                        toRemove.add(e);
-                        break;
-                }
+                e.chanceToBonus();
+                score+=e.getScore();
+                toRemove.add(e);
             }
         }
         enemyList.removeAll(toRemove);
     }
     
+    private boolean checkHit(BulletEntities e){
+        boolean remove=false;
+        Rectangle a=player.entitySquare();
+        if(a.intersects(e.entitySquare()) && !player.recovering()){
+            player.calculateDamage(e.getDamage()-((e.getDamage()*damageReduction)/100));
+            remove=true;
+        }
+        return remove;
+    }
     public boolean detectRest(){
         Rectangle a=player.entitySquare();
         
-        for(LightShipFire e : lightFire){
-            if(a.intersects(e.entitySquare()) && !player.recovering()){
-                player.calculateDamage(10-((10*damageReduction)/100));
+        for(BulletEntities e : lasersList){
+            if(checkHit(e) && e.getDamage()<70){
                 toRemove.add(e);
             }
         }
-        lightFire.removeAll(toRemove);
-        
-        for(LightShipFire e : mediumFire){
-            if(a.intersects(e.entitySquare()) && !player.recovering()){
-                player.calculateDamage(12-((12*damageReduction)/100));
-                toRemove.add(e);
-            }
-        }
-        mediumFire.removeAll(toRemove);
-        
-        for(HeavyOneShot e : heavyFire){
-            if(a.intersects(e.entitySquare()) && !player.recovering()){
-                player.calculateDamage(25-((25*damageReduction)/100));
-                toRemove.add(e);
-            }
-        }
-        heavyFire.removeAll(toRemove);
-        
-        for(BigOneLaser e : flagFire){
-            if(a.intersects(e.entitySquare()) && !player.recovering()){
-                player.calculateDamage(80-((80*damageReduction)/100));
-            }
-        }
+        lasersList.removeAll(toRemove);
         
         for(EntitiesShips e : enemyList){
-            if(e.getSize()==2){
+            if(e.getImage()==map.get(6)){
                 if(a.intersects(e.entitySquare()) && !player.recovering()){
                     player.calculateDamage(300-((300*damageReduction)/100));
                     playShipDestroyed();

@@ -35,12 +35,7 @@ public class MediumEnemyShip extends EntitiesShips implements EnemyStuff{
     public int getScore(){
         return 60;
     }
-    
-    @Override
-    public int getSize(){
-        return 2;
-    }
-    
+
     @Override
     public void update(){
         if(!doingSpecial && !returning){chanceToSpecial();}
@@ -90,9 +85,9 @@ public class MediumEnemyShip extends EntitiesShips implements EnemyStuff{
     @Override
     public void tryToShot(){
         if(Math.random()>=0.9998){
-            LightShipFire shot1 = new LightShipFire(x+(image.getWidth()-map.get(4).getWidth())/2-3,y+image.getHeight()+map.get(4).getHeight(),map.get(4));
+            BulletEntities shot1 = new LightShipFire(x+(image.getWidth()-map.get(4).getWidth())/2-3,y+image.getHeight()+map.get(4).getHeight(),map.get(4));
             mediumShipFire.add(shot1);
-            LightShipFire shot2 = new LightShipFire(x+(image.getWidth()-map.get(4).getWidth())/2+3,y+image.getHeight()+map.get(4).getHeight(),map.get(4));
+            BulletEntities shot2 = new LightShipFire(x+(image.getWidth()-map.get(4).getWidth())/2+3,y+image.getHeight()+map.get(4).getHeight(),map.get(4));
             mediumShipFire.add(shot2);
         }
     }

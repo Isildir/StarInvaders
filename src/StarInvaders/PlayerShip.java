@@ -125,6 +125,7 @@ public class PlayerShip extends EntitiesShips {
     }
 
     
+    @Override
     public void update(){
         
         if(life<=0 && lifes>=1){recovering=true;recoverTimer=150;life=fullLife;shield=fullShield;lifes--;}
